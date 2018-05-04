@@ -7,10 +7,11 @@ inicial = datetime.datetime.now()
 
 spell_checker = hunspell.HunSpell('/usr/share/hunspell/es_ES.dic','/usr/share/hunspell/es_ES.aff')
 
-
 spell_checker.add('bancolombia')
 
 json_data = Util.json_chats_load()
+
+rae = Util.import_csv("CREA")
 
 listado_chats = {}
 chat = {}
@@ -18,7 +19,8 @@ total_good = 0
 total_bad = 0
 
 grand_total_chats = 0
-grand_total_good = 0
+grand_total_good_RAE = 0
+grand_total_good_hunspell = 0
 grand_total_bad = 0
 
 bad_rec = {}
@@ -35,7 +37,8 @@ for jchat in json_data:
 
     errors = []
 
-    total_good = 0
+    total_good_sc = 0
+    total_good_rae = 0
     total_bad = 0
     chat['id'] = id_chat
     for jtext in jchat['messages_all']:
@@ -56,8 +59,11 @@ for jchat in json_data:
         jtext['text'] = jtext['text'].replace('|', '')
         for text in jtext['text'].split(' '):
             if not text.startswith('ACT') and not text.startswith('AGT') and not text.startswith('NUM') and not text.startswith('PHO'):
+                # if text in rae:
+                #     total_good_rae = total_good_rae + 1
+                #elif spell_checker.spell(text):
                 if spell_checker.spell(text):
-                    total_good = total_good + 1
+                    total_good_sc = total_good_sc + 1
                 else:
                     total_bad = total_bad + 1
                     errors.append(text)
@@ -87,20 +93,21 @@ for jchat in json_data:
                             count = count + 1
                     soundex_recom[id_chat + "_" + text] = soundex_suggest
 
-
-
-    chat['total_good'] = total_good
+    #chat['total_good_RAE'] = total_good_rae
+    chat['total_good_hunspell'] = total_good_sc
     chat['total_bad'] = total_bad
     chat['errors'] = errors
 
     listado_chats[id_chat] = chat
 
     grand_total_chats = grand_total_chats + 1
-    grand_total_good = grand_total_good + total_good
+    #grand_total_good_RAE = grand_total_good_RAE + total_good_rae
+    grand_total_good_hunspell = grand_total_good_hunspell + total_good_sc
     grand_total_bad = grand_total_bad + total_bad
 
 Util.export_cvs("SpellCheck_x_Chat",listado_chats)
-Util.export_cvs("SpellCheck_Total",{'Total de chats':grand_total_chats,'Palabras encontradas':grand_total_good,'Palabras no encontradas':grand_total_bad})
+#Util.export_cvs("SpellCheck_Total",{'Total de chats':grand_total_chats,'Palabras encontradas por Diccionario RAE':grand_total_good_RAE,'Palabras encontradas por hunspell':grand_total_good_hunspell,'Palabras no encontradas':grand_total_bad})
+Util.export_cvs("SpellCheck_Total",{'Total de chats':grand_total_chats,'Palabras encontradas por hunspell':grand_total_good_hunspell,'Palabras no encontradas':grand_total_bad})
 Util.export_cvs("SpellCheck_Recommendation",bad_rec)
 Util.export_cvs("SpellCheck_Soundex_Recommendation",soundex_recom)
 

@@ -83,3 +83,16 @@ class Util:
             print('CSV file successfully exported!')
         except:
             Util.write_standard_error(sys.exc_info())
+
+    @staticmethod
+    def import_csv(input_file):
+        try:
+            list = []
+            path_input = st_root.ROOT_DIR + os.sep + 'data' + os.sep + 'input' + os.sep + input_file + '.csv'
+            file_input = open(path_input, encoding='utf-8')
+            csv_reader = csv.reader(file_input, delimiter=';')
+            for row in csv_reader:
+                list.append(row)
+            return list
+        except:
+            Util.write_standard_error(sys.exc_info())
