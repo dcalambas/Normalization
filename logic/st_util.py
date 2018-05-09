@@ -92,7 +92,8 @@ class Util:
             file_input = open(path_input, encoding='utf-8')
             csv_reader = csv.reader(file_input, delimiter=';')
             for row in csv_reader:
-                list.append(row)
+                for text in row:
+                    list.append(text.strip())
             return list
         except:
             Util.write_standard_error(sys.exc_info())
